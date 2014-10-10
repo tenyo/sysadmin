@@ -28,8 +28,8 @@
 ### NAT
 LVS-NAT requires that the load-balancers act as default gateways for our web servers - 
 you'll need to configure a static route on all web servers, so their DG is the LB.
-
 You may want to have other special routes via the real default gateway e.g. for SSH connections.
+
 On the LB's you'll need to add the following to sysctl.conf:
 
       net.ipv4.ip_forward = 1
