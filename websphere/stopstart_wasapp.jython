@@ -1,0 +1,98 @@
+##
+# Script to stop/start WebSphere 7 apps
+#
+# Run using wsadmin, e.g.
+#  ./wsadmin.sh -lang jython -f wasapps.jython [start | stop | list]
+##
+
+cellname = "CELL"
+nodename = "NODE"
+clustername = "CLUSTER"
+servername = "SERVER"
+
+# List of clusters that contain apps that should be stopped
+loop_list = [1,2,3]
+
+# List of apps that should be stopped/started
+appslist = [    "APP1",
+                "APP2",
+                "APP3",
+           ]
+
+lineSeparator = java.lang.System.getProperty('line.separator')
+
+
+##################################################################
+# Function definitions
+
+
+def appRunning(appName, serverName, nodeName):
+        return AdminControl.completeObjectName("type=Application,name=%s,process=%s,node=%s,*" % (appName, serverName, nodeName)) != ""
+
+
+def start_apps():
+        for n in loop_list:
+                print "\n " + clustername + "%s apps " %n
+                thisservername = servername + str(n) + "1"
+                clusterapps = AdminApp.list("WebSphere:cell=" + cellname + ",node=" + nodename + ",server=" + thisservername).split(lineSeparator)
+                for app in clusterapps:
+                        if app in appslist:
+                                if not appRunning(app, thisservername, nodename):
+                                        print "Starting " + app
+                                        AdminApplication.startApplicationOnCluster(app, clustername + str(n))
+                                else:
+                                        print app + " already running."
+
+
+def stop_apps():
+        for n in loop_list:
+                print "\n " + clustername + "%s apps " %n
+                thisservername = servername + str(n) + "1"
+                clusterapps = AdminApp.list("WebSphere:cell=" + cellname + ",node=" + nodename + ",server=" + thisservername).split(lineSeparator)
+                for app in clusterapps:
+                        if app in appslist:
+                                if appRunning(app, thisservername, nodename):
+                                        print "Stopping " + app
+                                        AdminApplication.stopApplicationOnCluster(app, clustername + str(n))
+                                else:
+                                        print app + " already stopped."
+
+
+def list_apps():
+        for n in loop_list:
+                print "\n " + clustername + "%s apps " %n
+                thisservername = servername + str(n) + "1"
+                clusterapps = AdminApp.list("WebSphere:cell=" + cellname + ",node=" + nodename + ",server=" + thisservername).split(lineSeparator)
+                for app in clusterapps:
+                        if app in appslist:
+                                if appRunning(app, thisservername, nodename):
+                                        print app + " - RUNNING"
+                                else:
+                                        print app + " - STOPPED"
+
+
+#################################################################
+# Main
+
+if len(sys.argv) == 1:
+        param = sys.argv[0]
+
+        if (param == "list"):
+                print "Listing apps that will be affected by this script ... "
+                list_apps()
+        elif (param == "start"):
+                print "Starting apps ... "
+                start_apps()
+        elif (param == "stop"):
+                print "Stopping apps ... "
+                stop_apps()
+        else:
+                print "Accepted parameters are: [start | stop | list] \n"
+                sys.exit()
+else:
+        print "Accepted parameters are: [start | stop | list] \n"
+        sys.exit()
+
+
+sys.exit(0)
+
