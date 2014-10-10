@@ -1,0 +1,66 @@
+serial_no = 1
+primary = 10.200.10.11
+service = lvs
+backup_active = 1
+backup = 10.200.10.12
+heartbeat = 1
+heartbeat_port = 539
+keepalive = 6
+deadtime = 18
+network = nat
+nat_router = 10.200.10.100 eth0:1
+nat_nmask = 255.255.255.0
+debug_level = NONE
+monitor_links = 0
+virtual HTTP_1 {
+     active = 1
+     address = 10.200.10.100 eth0:1
+     vip_nmask = 255.255.255.0
+     port = 80
+     persistent = 60
+     send = "GET / HTTP/1.0\r\n\r\n"
+     expect = "HTTP"
+     use_regex = 0
+     load_monitor = none
+     scheduler = wlc
+     protocol = tcp
+     timeout = 15
+     reentry = 15
+     quiesce_server = 0
+     server WEB101 {
+         address = 10.200.10.101
+         active = 1
+         weight = 10
+     }
+     server WEB102 {
+         address = 10.200.10.102
+         active = 1
+         weight = 10
+     }
+}
+virtual HTTP_2 {
+     active = 1
+     address = 10.200.10.200 eth0:2
+     vip_nmask = 255.255.255.0
+     port = 80
+     persistent = 60
+     send = "GET / HTTP/1.0\r\n\r\n"
+     expect = "HTTP"
+     use_regex = 0
+     load_monitor = none
+     scheduler = wlc
+     protocol = tcp
+     timeout = 15
+     reentry = 15
+     quiesce_server = 0
+     server WEBPROD201 {
+         address = 10.200.10.201
+         active = 1
+         weight = 10
+     }
+     server WEBPROD202 {
+         address = 10.200.10.202
+         active = 1
+         weight = 10
+     }
+}
